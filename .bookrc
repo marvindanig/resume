@@ -1,0 +1,10 @@
+{
+  "mode": {
+    "HTML": "markdown",
+    "CSS": "scss",
+    "JS": "js",
+    "HEAD": "html"
+  },
+  "name": "resumé",
+  "type": "text"
+}
