@@ -1,218 +1,249 @@
 +!~-(((r, undefined) => {
+  const gulp = r('gulp')
+  const fs = r('fs') // Remove this may be.
+  const browserSync = r('browser-sync')
+  const handlebars = r('gulp-compile-handlebars')
+  const fsp = r('fs-promise')
+  const path = r('path')
 
+  // Gulp plugins
+  const concat = r('gulp-concat')
+  const gulpif = r('gulp-if')
 
-    const gulp = r('gulp');
-    const babel = r('gulp-babel');
-    
-    // TODO: Transpile all ES6 code to ES5 for browser compatibility.
-    
-    // gulp.task('transpile', () => {
-    //     return gulp.src('src/*.js')
-    //         .pipe(babel({ "presets": ["es2015"] }))
-    //         .pipe(gulp.dest('build/'));
-    // });
+  // HTML preprocessors
+  const haml = r('gulp-haml')
+  const markdown = r('gulp-markdown')
 
+  // Style preprocessors
+  const sass = r('gulp-sass')
+  const less = r('gulp-less')
+  const stylus = r('gulp-stylus')
+  const postcss = r('gulp-postcss')
 
-    const browserSync = r('browser-sync');
-    const handlebars = r('gulp-compile-handlebars');
-    const fs = r('fs');
-    const path = r('path');
-    const del = r('del');
-    const delayed = r('delayed');
+  // *************************************//
+  // ******** DEPENDENCIES ABOVE *********//
+  // *************************************//
 
-    // Gulp plugins
-    const concat = r('gulp-concat');
-    const gulpif = r('gulp-if');
+  gulp.task('watchBook', () => {
+    browserSync.init({
+      server: './',
+      port: 4567,
+      notify: false,
+      logLevel: 'debug'
+    })
+  })
 
-    // HTML preprocessors
-    const haml = r('gulp-haml');
-    const markdown = r('gulp-markdown');
+  // gulp.task('default', ['renderBook', 'indexPage', 'watchBook'])
 
-    // Style preprocessors
-    const sass = r('gulp-sass');
-    const less = r('gulp-less');
-    const stylus = r('gulp-stylus');
-    const postcss = r('gulp-postcss');
+}))(require)
 
-    // Glob pattern matching
-    const glob = [path.join('manuscript', '*'),
-        path.join('manuscript', '*', '*.html'),
-        path.join('manuscript', '*', '*.css'),
-        path.join('manuscript', '*', '*.js')
-    ];
+// +!~-(((r, undefined) => {
 
-    gulp.task('watchBook', () => {
-        browserSync.init({
-            server: "./",
-            port: 4567,
-            notify: false,
-            host: 'bubblin.com'
-        });
+//   const gulp = r('gulp')
+//   const babel = r('gulp-babel')
 
-        // Watch for deleted directories
-        gulp.watch(path.join('trash', '*'), obj => {
-            const pagePath = obj.path;
-            const paths = pagePath.split(path.sep);
-            let page = paths[paths.length - 1] === '' ? paths[paths.length - 2] : paths[paths.length - 1];
-            page = `${page.split('-')[0]}-${page.split('-')[1]}`;
-            if (obj.type === 'added') {
-                del(path.join('build', 'manuscript', page));
-                del(path.join('build', 'renders', `${page}.html`));
-                gulp.start('indexPage');
-            }
-        });
+//   // TODO: Transpile all ES6 code to ES5 for browser compatibility.
 
-        // watch for everything else
-        gulp.watch(glob, obj => {
-            let page;
-            let pagePath = obj.path;
-            const paths = pagePath.split(path.sep);
-            if (paths[paths.length - 1] === '') {
-                page = paths[paths.length - 2];
-            } else if (paths[paths.length - 1].split('-')[0] === 'page') {
-                page = paths[paths.length - 1];
-            } else {
-                page = paths[paths.length - 2];
-                pagePath = path.dirname(obj.path);
-            }
-            del(path.join('build', 'manuscript', page));
-            if (obj.type === 'added') {
-                gulp.start('indexPage');
-            }
-            /** Hard disk may be deleting files, wait for it to finish
-             ** Experimented a bit and 1 sec is right for my system
-             ** Slower network shares may need a longer delay
-             **/
-            delayed.delay(() => {
-                const stats = fs.statSync(pagePath);
-                if (stats.isDirectory()) {
-                    gulp.src(path.join(pagePath, '*'))
-                        .pipe(gulpif(/[.]haml$/, haml()))
-                        .pipe(gulpif(/[.]md$/, markdown()))
+//   // gulp.task('transpile', () => {
+//   //     return gulp.src('src/*.js')
+//   //         .pipe(babel({ "presets": ["es2015"] }))
+//   //         .pipe(gulp.dest('build/'))
+//   // })
 
-                    .pipe(gulpif(/[.]scss|sass$/, sass()))
-                        .pipe(gulpif(/[.]less$/, less()))
-                        .pipe(gulpif(/[.]styl$/, stylus()))
+//   const browserSync = r('browser-sync')
+//   const handlebars = r('gulp-compile-handlebars')
+//   const fs = r('fs')
+//   const path = r('path')
+//   const del = r('del')
+//   const delayed = r('delayed')
 
-                    .pipe(gulp.dest(path.join('build', 'manuscript', page)))
-                        .on('end', () => {
-                            renderPage(page);
-                        });
-                }
-            }, 1000);
-        });
+//   // Gulp plugins
+//   const concat = r('gulp-concat')
+//   const gulpif = r('gulp-if')
 
-        gulp.watch(path.join('templates', '**.*'), obj => {
-            gulp.start('renderBook');
-        });
+//   // HTML preprocessors
+//   const haml = r('gulp-haml')
+//   const markdown = r('gulp-markdown')
 
-    });
+//   // Style preprocessors
+//   const sass = r('gulp-sass')
+//   const less = r('gulp-less')
+//   const stylus = r('gulp-stylus')
+//   const postcss = r('gulp-postcss')
 
-    gulp.task('pages', () => gulp.src(path.join('manuscript', '*', '*'))
-        .pipe(gulpif(/[.]haml$/, haml()))
-        .pipe(gulpif(/[.]md$/, markdown()))
-        .pipe(gulpif(/[.]scss|sass$/, sass()))
-        .pipe(gulpif(/[.]less$/, less()))
-        .pipe(gulpif(/[.]styl$/, stylus()))
-        .pipe(gulp.dest(path.join('build', 'manuscript'))));
+//   // Glob pattern matching
+//   const glob = [path.join('manuscript', '*'),
+//     path.join('manuscript', '*', '*.html'),
+//     path.join('manuscript', '*', '*.css'),
+//     path.join('manuscript', '*', '*.js')
+//   ]
 
-    gulp.task('templates', () => gulp.src(path.join('templates', '*.+(js|css|html)'))
-        .pipe(gulp.dest(path.join('build', 'templates'))));
+//   gulp.task('watchBook', () => {
+//     browserSync.init({
+//       server: './',
+//       port: 4567,
+//       notify: false,
+//       logLevel: 'debug'
+//     })
 
-    function getFolders(dir) {
-        return fs.readdirSync(dir)
-            .filter(file => fs.statSync(path.join(dir, file)).isDirectory());
-    }
+//     // Watch for deleted directories
+//     gulp.watch(path.join('trash', '*'), obj => {
+//       const pagePath = obj.path
+//       const paths = pagePath.split(path.sep)
+//       let page = paths[paths.length - 1] === '' ? paths[paths.length - 2] : paths[paths.length - 1]
+//       page = `${page.split('-')[0]}-${page.split('-')[1]}`
+//       if (obj.type === 'added') {
+//         del(path.join('build', 'manuscript', page))
+//         del(path.join('build', 'renders', `${page}.html`))
+//         gulp.start('indexPage')
+//       }
+//     })
 
-    gulp.task('renderBook', ['pages', 'templates'], () => {
-        const folders = getFolders(path.join('.', 'build', 'manuscript'));
+//     // watch for everything else
+//     gulp.watch(glob, obj => {
+//       let page
+//       let pagePath = obj.path
+//       const paths = pagePath.split(path.sep)
+//       if (paths[paths.length - 1] === '') {
+//         page = paths[paths.length - 2]
+//       } else if (paths[paths.length - 1].split('-')[0] === 'page') {
+//         page = paths[paths.length - 1]
+//       } else {
+//         page = paths[paths.length - 2]
+//         pagePath = path.dirname(obj.path)
+//       }
+//       del(path.join('build', 'manuscript', page))
+//       if (obj.type === 'added') {
+//         gulp.start('indexPage')
+//       }
+//       /** Hard disk may be deleting files, wait for it to finish
+//        ** Experimented a bit and 1 sec is right for my system
+//        ** Slower network shares may need a longer delay
+//        **/
+//       delayed.delay(() => {
+//         const stats = fs.statSync(pagePath)
+//         if (stats.isDirectory()) {
+//           gulp.src(path.join(pagePath, '*'))
+//             .pipe(gulpif(/[.]haml$/, haml()))
+//             .pipe(gulpif(/[.]md$/, markdown()))
 
-        folders.map(folder => {
-            renderPage(folder);
-        });
-    });
+//             .pipe(gulpif(/[.]scss|sass$/, sass()))
+//             .pipe(gulpif(/[.]less$/, less()))
+//             .pipe(gulpif(/[.]styl$/, stylus()))
 
-    function renderPage(page) {
-        const bodyPath = path.join('.', 'build', 'manuscript', page, "body.html"),
-            headPath = path.join('.', 'build', 'manuscript', page, "head.html"),
-            scriptPath = path.join('.', 'build', 'manuscript', page, "script.js"),
-            stylePath = path.join('.', 'build', 'manuscript', page, "style.css"),
-            templateStylePath = path.join('.', 'templates', "style.css"),
-            templateHeadPath = path.join('.', 'templates', "head.html");
+//             .pipe(gulp.dest(path.join('build', 'manuscript', page)))
+//             .on('end', () => {
+//               renderPage(page)
+//             })
+//         }
+//       }, 1000)
+//     })
 
-        let bodyContent = '',
-            styleContent = '',
-            templateStyleContent = '',
-            scriptContent = '',
-            headContent = '',
-            templateHeadContent = '';
+//     gulp.watch(path.join('templates', '**.*'), obj => {
+//       gulp.start('renderBook')
+//     })
+//   })
 
-        // TODO: fs.existsSync() is deprecated, use fs.statSync() instead
+//   gulp.task('pages', () => gulp.src(path.join('manuscript', '*', '*'))
+//     .pipe(gulpif(/[.]haml$/, haml()))
+//     .pipe(gulpif(/[.]md$/, markdown()))
+//     .pipe(gulpif(/[.]scss|sass$/, sass()))
+//     .pipe(gulpif(/[.]less$/, less()))
+//     .pipe(gulpif(/[.]styl$/, stylus()))
+//     .pipe(gulp.dest(path.join('build', 'manuscript'))))
 
-        if (fs.existsSync(bodyPath)) {
-            bodyContent = fs.readFileSync(bodyPath, 'utf-8').toString();
-        }
-        if (fs.existsSync(stylePath)) {
-            styleContent = fs.readFileSync(stylePath, 'utf-8').toString();
-        }
-        if (fs.existsSync(templateStylePath)) {
-            templateStyleContent = fs.readFileSync(templateStylePath, 'utf-8').toString();
-        }
-        if (fs.existsSync(headPath)) {
-            headContent = fs.readFileSync(headPath, 'utf-8').toString();
-        }
-        if (fs.existsSync(templateHeadPath)) {
-            templateHeadContent = fs.readFileSync(templateHeadPath, 'utf-8').toString();
-        }
-        if (fs.existsSync(scriptPath)) {
-            scriptContent = fs.readFileSync(scriptPath, 'utf-8').toString();
-        }
+//   gulp.task('templates', () => gulp.src(path.join('templates', '*.+(js|css|html)'))
+//     .pipe(gulp.dest(path.join('build', 'templates'))))
 
-        const templateData = {
-            bodyContent,
-            templateStyleContent,
-            styleContent,
-            headContent,
-            templateHeadContent,
-            scriptContent
-        };
+//   function getFolders (dir) {
+//     return fs.readdirSync(dir)
+//       .filter(file => fs.statSync(path.join(dir, file)).isDirectory())
+//   }
 
-        gulp.src(path.join('.', 'crust', 'page-template.html'))
-            .pipe(handlebars(templateData, {}))
-            .pipe(concat(`${page}.html`))
-            .pipe(gulp.dest(path.join('.', 'build', 'renders')))
-            .pipe(browserSync.stream());
+//   gulp.task('renderBook', ['pages', 'templates'], () => {
+//     const folders = getFolders(path.join('.', 'build', 'manuscript'))
 
-    }
+//     folders.map(folder => {
+//       renderPage(folder)
+//     })
+//   })
 
+//   function renderPage (page) {
+//     const bodyPath = path.join('.', 'build', 'manuscript', page, 'body.html'),
+//       headPath = path.join('.', 'build', 'manuscript', page, 'head.html'),
+//       scriptPath = path.join('.', 'build', 'manuscript', page, 'script.js'),
+//       stylePath = path.join('.', 'build', 'manuscript', page, 'style.css'),
+//       templateStylePath = path.join('.', 'templates', 'style.css'),
+//       templateHeadPath = path.join('.', 'templates', 'head.html')
 
-    gulp.task('indexPage', () => {
-        const book = r('book-length');
+//     let bodyContent = '',
+//       styleContent = '',
+//       templateStyleContent = '',
+//       scriptContent = '',
+//       headContent = '',
+//       templateHeadContent = ''
 
-        const bookLength = book.length();
+//     // TODO: fs.existsSync() is deprecated, use fs.statSync() instead
 
-        let contentString = '';
+//     if (fs.existsSync(bodyPath)) {
+//       bodyContent = fs.readFileSync(bodyPath, 'utf-8').toString()
+//     }
+//     if (fs.existsSync(stylePath)) {
+//       styleContent = fs.readFileSync(stylePath, 'utf-8').toString()
+//     }
+//     if (fs.existsSync(templateStylePath)) {
+//       templateStyleContent = fs.readFileSync(templateStylePath, 'utf-8').toString()
+//     }
+//     if (fs.existsSync(headPath)) {
+//       headContent = fs.readFileSync(headPath, 'utf-8').toString()
+//     }
+//     if (fs.existsSync(templateHeadPath)) {
+//       templateHeadContent = fs.readFileSync(templateHeadPath, 'utf-8').toString()
+//     }
+//     if (fs.existsSync(scriptPath)) {
+//       scriptContent = fs.readFileSync(scriptPath, 'utf-8').toString()
+//     }
 
-        for (let index = 1; index <= bookLength; index++) {
-            contentString += `<div class='page'><iframe src='build/renders/page-${index}.html'></iframe></div>`;
-        }
+//     const templateData = {
+//       bodyContent,
+//       templateStyleContent,
+//       styleContent,
+//       headContent,
+//       templateHeadContent,
+//     scriptContent}
 
-        const packageJson = JSON.parse(fs.readFileSync('package.json').toString());
-        const bookname = packageJson.name;
+//     gulp.src(path.join('.', 'crust', 'page-template.html'))
+//       .pipe(handlebars(templateData, {}))
+//       .pipe(concat(`${page}.html`))
+//       .pipe(gulp.dest(path.join('.', 'build', 'renders')))
+//       .pipe(browserSync.stream())
+//   }
 
-        const templateData = {
-            CONTENT: contentString,
-            BOOKNAME: bookname
-        };
+//   gulp.task('indexPage', () => {
+//     const book = r('book-length')
 
-        gulp.src(path.join('.', 'crust', 'index-template.html'))
-            .pipe(handlebars(templateData, {}))
-            .pipe(concat('index.html'))
-            .pipe(gulp.dest('.'))
-            .pipe(browserSync.stream());
+//     const bookLength = book.length()
 
-    });
+//     let contentString = ''
 
-    gulp.task('default', ['renderBook', 'indexPage', 'watchBook']);
+//     for (let index = 1; index <= bookLength; index++) {
+//       contentString += `<div class='page'><iframe src='build/renders/page-${index}.html'></iframe></div>`
+//     }
 
-}))(require);
+//     const packageJson = JSON.parse(fs.readFileSync('package.json').toString())
+//     const bookname = packageJson.name
+
+//     const templateData = {
+//       CONTENT: contentString,
+//       BOOKNAME: bookname
+//     }
+
+//     gulp.src(path.join('.', 'crust', 'index-template.html'))
+//       .pipe(handlebars(templateData, {}))
+//       .pipe(concat('index.html'))
+//       .pipe(gulp.dest('.'))
+//       .pipe(browserSync.stream())
+//   })
+
+//   gulp.task('default', ['renderBook', 'indexPage', 'watchBook'])
+// }))(require)
